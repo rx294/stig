@@ -1,9 +1,3 @@
-# NOTE: To use this file you must export or set the following:
-# AWS_SG_ID : your aws security group id
-# AWS_SSH_KEY_ID : your aws ssh key id
-# AWS_SUBNET_ID : your aws subnet id for your vpc
-# NOTE: This file assumes your aws ssh private key is in your home dir .ssh dir
-#
 <%
   platforms = %w(centos-7 centos-6)
   use_git = true
@@ -15,7 +9,7 @@ driver:
 
 rovisioner:
   name: chef_zero
-  
+
 verifier:
   name: inspec
   sudo: true
