@@ -1,0 +1,89 @@
+# NOTE: To use this file you must export or set the following:
+# AWS_SG_ID : your aws security group id
+# AWS_SSH_KEY_ID : your aws ssh key id
+# AWS_SUBNET_ID : your aws subnet id for your vpc
+# NOTE: This file assumes your aws ssh private key is in your home dir .ssh dir
+#
+<%
+  platforms = %w(centos-7 centos-6)
+  use_git = true
+  use_json = false
+%>
+---
+driver:
+  name: ec2
+  chef_version: latest
+  privileged: true
+  security_group_ids: <%= ENV['AWS_SG_ID'] %>
+  aws_ssh_key_id: <%= ENV['AWS_SSH_KEY_ID'] %>
+  subnet_id: <%= ENV['AWS_SUBNET_ID'] %>
+
+provisioner:
+  name: chef_zero
+
+transport:
+  name: ssh
+  ssh_key: ~/.ssh/<%= ENV['AWS_SSH_KEY_ID'] %>.pem
+
+verifier:
+  name: inspec
+  sudo: true
+  sudo_options: '-u root'
+  inspec_tests:
+    - name: nginix-baseline
+      git: https://github.com/aaronlippold/nginx-baseline.git
+    - name: disa_stig-el7
+      git: https://github.com/jburns12/inspec-profile-disa_stig-el7.git
+  <% if use_json == true %>
+  format: json
+  output: "%{platform}_%{suite}-<%= Time.now.iso8601 %>.json"
+  <% end %>
+
+platforms:
+<% platforms.each do |plat| %>
+- name: <%= plat %>
+<% end %>
+
+suites:
+  - name: hardened-nginx
+    run_list:
+      - recipe[auditd]
+      - recipe[stig::auditd]
+      - recipe[stig::auditd_rules]
+      - recipe[stig::fstab_tmp]
+      - recipe[stig::tcp_wrappers]
+      - recipe[stig::boot_settings]
+      - recipe[stig::proc_hard]
+      - recipe[stig::cis]
+      - recipe[stig::avahi_daemon]
+      - recipe[stig::ipv6]
+      - recipe[stig::dhcp]
+      - recipe[stig::mail_transfer_agent]
+      - recipe[stig::hosts]
+      - recipe[stig::rsyslog]
+      - recipe[logrotate::global]
+      - recipe[stig::sshd_config]
+      - recipe[stig::system_auth]
+      - recipe[stig::login_defs]
+      - recipe[stig::login_banner]
+      - recipe[stig::file_permissions]
+      - recipe[stig::audits]
+      - recipe[stig::audit_scripts]
+      - recipe[stig::su_restriction]
+      - recipe[stig::aide]
+
+      # nginx runlist
+      - recipe[apt]
+      - recipe[nginx-hardening::upgrades]
+      - recipe[chef_nginx]
+      - recipe[nginx-hardening]
+
+    attributes:
+      "auditd" :
+        "ruleset" : "stig"
+
+  - name: vanilla-nginx
+    run_list:
+      - recipe[apt]
+      - recipe[nginx-hardening::upgrades]
+      - recipe[chef_nginx]
