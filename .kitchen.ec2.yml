@@ -34,6 +34,9 @@ verifier:
       git: https://github.com/aaronlippold/nginx-baseline.git
     - name: disa_stig-el7
       git: https://github.com/jburns12/inspec-profile-disa_stig-el7.git
+  attrs:
+    - aws.attributes.yml
+
   <% if use_json == true %>
   format: json
   output: "%{platform}_%{suite}-<%= Time.now.iso8601 %>.json"
