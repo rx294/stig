@@ -3,11 +3,12 @@
 # AWS_SSH_KEY_ID : your aws ssh key id
 # AWS_SUBNET_ID : your aws subnet id for your vpc
 # NOTE: This file assumes your aws ssh private key is in your home dir .ssh dir
-#
+# use_ebs : implements a beefier amazon instance to support ebs-optimized storage
 <%
   platforms = %w(centos-7 centos-6)
   use_git = true
   use_json = false
+  use_ebs = true
 %>
 ---
 driver:
@@ -17,6 +18,17 @@ driver:
   security_group_ids: <%= ENV['AWS_SG_ID'] %>
   aws_ssh_key_id: <%= ENV['AWS_SSH_KEY_ID'] %>
   subnet_id: <%= ENV['AWS_SUBNET_ID'] %>
+  
+  <% if use_ebs == true %>
+  ebs_optimized: true
+  instance_type: i3.2xlarge
+  block_device_mappings:
+    - device_name: /dev/sda1
+      ebs:
+        volume_type: gp2
+        delete_on_termination: true  
+  <% end %>
+
 
 provisioner:
   name: chef_zero
