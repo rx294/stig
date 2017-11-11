@@ -3,11 +3,11 @@
 # AWS_SSH_KEY_ID : your aws ssh key id
 # AWS_SUBNET_ID : your aws subnet id for your vpc
 # NOTE: This file assumes your aws ssh private key is in your home dir .ssh dir
-#
+# use_ebs : implements a beefier amazon instance to support ebs-optimized storage
 <%
   platforms = %w(centos-7 centos-6)
   use_json = false
-  use_aws_ebs = false
+  use_ebs = true
 %>
 ---
 driver:
@@ -17,7 +17,7 @@ driver:
   security_group_ids: <%= ENV['AWS_SG_ID'] %>
   aws_ssh_key_id: <%= ENV['AWS_SSH_KEY_ID'] %>
   subnet_id: <%= ENV['AWS_SUBNET_ID'] %>
-<% if use_aws_ebs == true %>
+<% if use_ebs == true %>
   ebs_optimized: true
   instance_type: i3.2xlarge
   block_device_mappings:
@@ -43,6 +43,9 @@ verifier:
       git: https://github.com/aaronlippold/nginx-baseline.git
     - name: disa_stig-el7
       git: https://github.com/jburns12/inspec-profile-disa_stig-el7.git
+  attrs:
+    - aws.attributes.yml
+
   <% if use_json == true %>
   format: json
   output: "%{platform}_%{suite}-<%= Time.now.iso8601 %>.json"

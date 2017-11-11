@@ -5,9 +5,9 @@ STIG Cookbook
 
 `.kitchen.ec2.yml` file uses the follow environment variables.
 
-AWS_SG_ID : your aws security group id
-AWS_SSH_KEY_ID : your aws ssh key id
-AWS_SUBNET_ID : your aws subnet id for your vpc
+* AWS_SG_ID : your aws security group id
+* AWS_SSH_KEY_ID : your aws ssh key id
+* AWS_SUBNET_ID : your aws subnet id for your vpc
 
 The `.kitchen.ec2.yml` also assumes your aws ssh private key is in `~/.ssh` dir
 
