@@ -6,9 +6,20 @@
 ---
 driver:
   name: vagrant
+  require_chef_omnibus: true
 
-rovisioner:
+transport:
+  name: ssh
+  connection_retries: 12
+  connection_retry_sleep: 10
+
+provisioner:
   name: chef_zero
+  always_update_cookbooks: true
+  retry_on_exit_code:
+    - 35 # exit code signaling that the node is rebooting
+  client_rb:
+    client_fork: false # forked instances don't return the real exit code
 
 verifier:
   name: inspec
@@ -32,36 +43,38 @@ platforms:
 suites:
   - name: hardened-nginx
     run_list:
+      - recipe[stig::test]
       - recipe[auditd]
       - recipe[stig::auditd]
       - recipe[stig::auditd_rules]
-      - recipe[stig::fstab_tmp]
-      - recipe[stig::tcp_wrappers]
-      - recipe[stig::boot_settings]
-      - recipe[stig::proc_hard]
-      - recipe[stig::cis]
-      - recipe[stig::avahi_daemon]
-      - recipe[stig::ipv6]
-      - recipe[stig::dhcp]
-      - recipe[stig::mail_transfer_agent]
-      - recipe[stig::hosts]
-      - recipe[stig::rsyslog]
-      - recipe[logrotate::global]
-      - recipe[stig::sshd_config]
-      - recipe[stig::system_auth]
-      - recipe[stig::login_defs]
-      - recipe[stig::login_banner]
-      - recipe[stig::file_permissions]
-      - recipe[stig::audits]
-      - recipe[stig::audit_scripts]
-      - recipe[stig::su_restriction]
-      - recipe[stig::aide]
-
-      # nginx runlist
+      # - recipe[stig::fstab_tmp]
+      # - recipe[stig::tcp_wrappers]
+      # - recipe[stig::boot_settings]
+      # - recipe[stig::proc_hard]
+      # - recipe[stig::cis]
+      # - recipe[stig::avahi_daemon]
+      # - recipe[stig::ipv6]
+      # - recipe[stig::dhcp]
+      # - recipe[stig::mail_transfer_agent]
+      # - recipe[stig::hosts]
+      # - recipe[stig::rsyslog]
+      # - recipe[logrotate::global]
+      # - recipe[stig::sshd_config]
+      # - recipe[stig::system_auth]
+      # - recipe[stig::login_defs]
+      # - recipe[stig::login_banner]
+      # - recipe[stig::file_permissions]
+      # - recipe[stig::audits]
+      # - recipe[stig::audit_scripts]
+      # - recipe[stig::su_restriction]
+      # - recipe[stig::aide]
+      # - recipe[stig::reboot]
+      #
+      # # nginx runlist
       - recipe[apt]
-      - recipe[nginx-hardening::upgrades]
-      - recipe[chef_nginx]
-      - recipe[nginx-hardening]
+      # - recipe[nginx-hardening::upgrades]
+      # - recipe[chef_nginx]
+      # - recipe[nginx-hardening]
 
     attributes:
       "auditd" :

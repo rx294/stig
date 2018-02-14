@@ -1,39 +1,19 @@
-# NOTE: To use this file you must export or set the following:
-# AWS_SG_ID : your aws security group id
-# AWS_SSH_KEY_ID : your aws ssh key id
-# AWS_SUBNET_ID : your aws subnet id for your vpc
-# USE_JSON : set to true if you want inspec to output JSON
-# NOTE: This file assumes your aws ssh private key is in your home dir .ssh dir
-# USE_EBS : implements a beefier amazon instance to support ebs-optimized storage
 <%
   platforms = %w(centos-7 centos-6)
-  use_json = ENV['USE_JSON']
-  use_ebs = ENV['USE_EBS']
+  use_git = true
+  use_json = true
 %>
 ---
 driver:
-  name: ec2
+  name: dokken
   chef_version: latest
-  privileged: true
-  security_group_ids: <%= ENV['AWS_SG_ID'] %>
-  aws_ssh_key_id: <%= ENV['AWS_SSH_KEY_ID'] %>
-  subnet_id: <%= ENV['AWS_SUBNET_ID'] %>
-<% if ENV['USE_EBS'] == 'true' %>
-  ebs_optimized: true
-  instance_type: i3.2xlarge
-  block_device_mappings:
-    - device_name: /dev/sda1
-      ebs:
-        volume_type: gp2
-        delete_on_termination: true
-<% end %>
-
-provisioner:
-  name: chef_zero
+  privileged: true # because Docker and SystemD/Upstart
 
 transport:
-  name: ssh
-  ssh_key: ~/.ssh/<%= ENV['AWS_SSH_KEY_ID'] %>.pem
+  name: dokken
+
+provisioner:
+  name: dokken
 
 verifier:
   name: inspec
@@ -44,10 +24,7 @@ verifier:
       git: https://github.com/aaronlippold/nginx-baseline.git
     - name: disa_stig-el7
       git: https://github.com/jburns12/inspec-profile-disa_stig-el7.git
-  attrs:
-    - aws.attributes.yml
-
-  <% if ENV['USE_JSON'] == 'true' %>
+  <% if use_json == true %>
   format: json
   output: "%{platform}_%{suite}-<%= Time.now.iso8601 %>.json"
   <% end %>
@@ -90,9 +67,6 @@ suites:
       - recipe[nginx-hardening::upgrades]
       - recipe[chef_nginx]
       - recipe[nginx-hardening]
-
-      # # PDT Setup
-      # - recipe[pdt]
 
     attributes:
       "auditd" :

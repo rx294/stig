@@ -4,9 +4,19 @@
 #
 # Copyright (c) 2014 The Authors, All Rights Reserved.
 
+# pkg_resource = case node['platform_family']
+#   when "fedora", "rhel", "amazon"
+#     :rpm_package
+#   when "ubuntu"
+#     :apt_package
+#   end
+#
+# pkg_path = ( pkg_resource == :apt_package ) ? "apt-get" : "yum"
+include_recipe 'stig::test'
+
 # RHEL6: 1.1.2, 1.1.3, 1.1.4, 1.1.6, 1.14, 1.1.15, 1.1.16
 
-# CENTOS6: 1.1.2, 1.1.3, 1.1.4, 1.1.6, 1.1.14, 1.1.15, 1.1.16
+# CENTOS6:# 1.1.2, 1.1.3, 1.1.4, 1.1.6, 1.1.14, 1.1.15, 1.1.16
 # CENTOS7: 1.1.2, 1.1.3, 1.1.4, 1.1.6, 1.1.14, 1.1.15, 1.1.16
 # UBUNTU: 2.2, 2.3, 2.4, 2.6, 2.14, 2.15, 2.16
 include_recipe 'stig::fstab_tmp'
